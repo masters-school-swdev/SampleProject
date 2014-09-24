@@ -3,7 +3,7 @@
  */
 package sample.project;
 
-import org.hamcrest.BaseDescription;
+import java.io.PrintStream;
 
 /**
  * 
@@ -17,17 +17,16 @@ import org.hamcrest.BaseDescription;
  * @author vagrant
  *
  */
-public class Main {
+public class EchoMessage {
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		
-		Main m = new Main();
+		EchoMessage m = new EchoMessage();
 		
-		System.out.println(
-				m.getProvider().getText());
+		m.echo(System.out);
 		
 	}
 
@@ -38,7 +37,7 @@ public class Main {
 	 * Construct a Main object using the default
 	 * SampleProvider, MainProvider
 	 */
-	public Main() {
+	public EchoMessage() {
 		this(new MainProvider());
 	}
 	
@@ -48,12 +47,16 @@ public class Main {
 	 * 
 	 * @param provider
 	 */
-	public Main(TextProviderInterface provider) {
+	public EchoMessage(TextProviderInterface provider) {
 		this._provider = provider;
 	}
 	
-	public TextProviderInterface getProvider() {
-		return this._provider;
+	public String getMessage() {
+		return this._provider.getText();
+	}
+	
+	public void echo(PrintStream out) {
+		out.println(getMessage());
 	}
 	
 	/**

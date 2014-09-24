@@ -2,9 +2,12 @@ package sample.project;
 
 import static org.junit.Assert.*;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
 import org.junit.Test;
 
-public class MainTest {
+public class EchoMessageTest {
 
 	/**
 	 * JUnit4 test methods are marked with the Test annotation,
@@ -12,7 +15,7 @@ public class MainTest {
 	 * executed and assert success or failure.
 	 */
 	@Test
-	public void testMain() {
+	public void testGetMessage() {
 		// Using a hard-coded string like this should be
 		// avoided. In Java, properties files are used to
 		// load external resources, such as Strings and Images.
@@ -30,7 +33,7 @@ public class MainTest {
 		// this second alternative solves the problem and
 		// does not introduce any security or functional bugs.
 		assertEquals("Hello World", 
-				new Main().getProvider().getText());
+				new EchoMessage().getMessage());
 	}
 
 	/**
@@ -43,15 +46,15 @@ public class MainTest {
 	 * but not failing test cases like this one.
 	 */
 	@Test
-	public void testMainThatFails() {
+	public void testGetMessageThatFails() {
 		assertEquals("", 
-				new Main().getProvider().getText());
+				new EchoMessage().getMessage());
 	}
 	/**
 	 * To complete the point about negative test cases... 
 	 */
 	@Test
-	public void testMainNegativeTest() {
+	public void testGetMessageNegativeTest() {
 		// Notice the signature of the assertNotEquals method,
 		// the two arguments on this one are Object _not_ String.
 		// 
@@ -60,7 +63,7 @@ public class MainTest {
 		// and StepInto the assertNotEquals method you will see the
 		// code execution path.
 		assertNotEquals("", 
-				new Main().getProvider().getText());
+				new EchoMessage().getMessage());
 	}
 	
 	/**
@@ -74,7 +77,7 @@ public class MainTest {
 	 * altering production code.
 	 */
 	@Test
-	public void testMainTextProvider() {
+	public void testOverrideProvider() {
 		// In lieu of a mocking library, we use an internal
 		// implementation of SampleProvider
 		//
@@ -83,9 +86,9 @@ public class MainTest {
 		// therefore using a hard-coded String in the test
 		// method is perfectly acceptable.
 		assertEquals("Test Provider", 
-			new Main(
+			new EchoMessage(
 				new TestProvider("Test Provider")
-			).getProvider().getText());
+			).getMessage());
 	}
 
 	/**
@@ -114,17 +117,54 @@ public class MainTest {
 	 * </blockquote>
 	 */
 	@Test
-	public void testMainTextProviderAnonymousClass() {
+	public void testTextProviderAnonymousClass() {
 		assertEquals("AnonClass",
-			new Main(
+			new EchoMessage(
 				// anonymous class implementing TextProviderInterface
 				new TextProviderInterface() {
 					public String getText() {
 						return "AnonClass";
 					}
 				}
-			).getProvider().getText());
+			).getMessage());
 	}
+	
+	/**
+	 * All the tests above demonstrate that EchoMessage and TextProvider interfaces are interacting properly.
+	 * The only thing left to test is the echo method of EchoMessage. 
+	 */
+	@Test
+	public void testEcho() {
+		// an output stream to collect our echoed message
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		// Java uses the Decorator pattern heavily, for things like this:
+		// a new PrintStream object uses our byte array outputstream as its
+		// destination stream. But the object doing the writing, our EchoMessage,
+		// can use methods added by PrintStream. In the case of our echo(PrintStream out) method
+		// we utilize the println(String str) method which exists in PrintStream but
+		// does not exist in OutputStream.
+		
+		// Review the Javadoc for PrintStream and its class heirarchy FilterOutputStream and OutputStream.
+		// http://docs.oracle.com/javase/7/docs/api/java/io/PrintStream.html
+		new EchoMessage().echo(new PrintStream(baos));
+		
+		
+		// Like the additional method println added to PrintStream, using ByteArrayOutputStream
+		// is an implementation of OutputStream that allow us to grab to bytes of data that were
+		// just written.
+		String actual_message = baos.toString();
+		
+		// Here we assert that our echo method did what we wanted. Note that the result
+		// is _not_ equal to the default text, "Hello World". The string "\n" represents
+		// a newline character in a Java String.
+		
+		// Do you understand why it is correct to expect that a newline character was added
+		// to our message when we called echo?
+		assertEquals("Hello World\n", actual_message);
+		
+	}
+	
+	
 	
 	/**
 	 * Use solely for unit tests in MainTest.
