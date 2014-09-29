@@ -24,8 +24,9 @@ public class EchoMessage {
 	 */
 	public static void main(String[] args) {
 		
-		EchoMessage m = new EchoMessage();
+		EchoMessage m = new EchoMessage(new InputStreamTextProvider(System.in));
 		
+		System.out.println("Enter: ");
 		m.echo(System.out);
 		
 	}
